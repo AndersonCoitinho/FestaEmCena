@@ -60,3 +60,46 @@ def validar_preco(df):
     )
 
     return preco.isna() | (preco < 0)
+
+
+def verificar_entregas(df):
+    # Considerar sem entrega quando a data estiver ausente (NaN) ou contiver apenas espaços.
+    sem_entrega = (
+        df["data_entrega"].isna() |
+        df["data_entrega"].astype("string").str.strip().eq("").fillna(False)
+    )
+
+    cancelado = (
+        df["status_pedido"]
+        .astype("string")
+        .str.strip()
+        .str.lower()
+        .eq("cancelado")
+        .fillna(False)
+    )
+
+    # Separar os dois grupos.
+    sem_entrega_cancelados = df[sem_entrega & cancelado]
+    sem_entrega_outros = df[sem_entrega & ~cancelado]
+
+    total_cancelados = len(sem_entrega_cancelados)
+    total_outros = len(sem_entrega_outros)
+
+    # Investigar a hipótese com condicionais.
+    if total_outros > 0:
+        print("Hipótese FALSA!")
+        print("Existem pedidos sem entrega que não estão cancelados.")
+    else:
+        print("Hipótese VERDADEIRA nesta base!")
+
+    print("Sem entrega e cancelados:", total_cancelados)
+    print("Sem entrega e outros status:", total_outros)
+
+    # Mostrar até três contraexemplos.
+    if total_outros > 0:
+        print("\nExemplos de pedidos:")
+        print(
+            sem_entrega_outros[
+                ["pedido_id", "status_pedido", "data_entrega"]
+            ].head(3)
+        )

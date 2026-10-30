@@ -5,7 +5,8 @@ from funcoes import (
     limpar_categoria,
     limpar_canal,
     validar_quantidade,
-    validar_preco
+    validar_preco,
+    verificar_entregas
 )
 
 
@@ -67,6 +68,9 @@ def main():
     print("Quantidades inválidas:", quantidade_invalida.sum())
     print("Preços inválidos:", preco_invalido.sum())
     print("Pedidos afetados:", pedidos_afetados)
+
+    print("\n--- Verificação das entregas ---")
+    verificar_entregas(df)
 
 
 if __name__ == "__main__":
