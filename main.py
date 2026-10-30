@@ -6,7 +6,8 @@ from funcoes import (
     limpar_canal,
     validar_quantidade,
     validar_preco,
-    verificar_entregas
+    verificar_entregas,
+    converter_data
 )
 
 
@@ -71,6 +72,58 @@ def main():
 
     print("\n--- Verificação das entregas ---")
     verificar_entregas(df)
+
+    
+    df["data_venda_original"] = df["data_venda"].copy()
+
+    # Converter as datas.
+    df["data_convertida"] = df["data_venda"].apply(converter_data)
+
+    # Marcar datas inválidas ou vazias.
+    df["data_invalida"] = df["data_convertida"].isna()
+
+    # Separar datas válidas e inválidas.
+    datas_validas = df[~df["data_invalida"]]
+    datas_invalidas = df[df["data_invalida"]]
+
+    # Extrair ano, mês, dia e hora.
+    df["ano"] = df["data_convertida"].apply(
+        lambda data: data.year if pd.notna(data) else None
+    )
+
+    df["mes"] = df["data_convertida"].apply(
+        lambda data: data.month if pd.notna(data) else None
+    )
+
+    df["dia"] = df["data_convertida"].apply(
+        lambda data: data.day if pd.notna(data) else None
+    )
+
+    df["hora"] = df["data_convertida"].apply(
+        lambda data: data.hour if pd.notna(data) else None
+    )
+
+    # Apresentar a data no formato brasileiro.
+    df["data_brasileira"] = df["data_convertida"].apply(
+        lambda data: data.strftime("%d/%m/%Y")
+        if pd.notna(data) else None
+    )
+
+    # Mostrar resultados.
+    print("\n--- Validação das datas ---")
+    print("Datas válidas:", len(datas_validas))
+    print("Datas inválidas ou vazias:", len(datas_invalidas))
+
+    print("\nPrimeiras 5 datas:")
+    print(df[[
+        "data_venda_original",
+        "ano",
+        "mes",
+        "dia",
+        "hora",
+        "data_brasileira"
+    ]].head())
+
 
 
 if __name__ == "__main__":

@@ -1,7 +1,6 @@
-
 import pandas as pd
 import re
-
+from datetime import datetime
 
 def limpar_categoria(valor):
     # Valores ausentes não têm categoria identificável.
@@ -23,7 +22,6 @@ def limpar_categoria(valor):
 
     return valor
 
-
 def limpar_canal(valor):
     if pd.isna(valor):
         return valor
@@ -38,7 +36,6 @@ def limpar_canal(valor):
 
     return canais.get(valor, valor)
 
-
 def validar_quantidade(df):
     # Quantidade deve ser inteira e maior que zero.
     quantidade = pd.to_numeric(
@@ -51,7 +48,6 @@ def validar_quantidade(df):
         (quantidade % 1 != 0)
     )
 
-
 def validar_preco(df):
     # Preço deve existir e não pode ser negativo.
     # Zero é permitido.
@@ -61,8 +57,8 @@ def validar_preco(df):
 
     return preco.isna() | (preco < 0)
 
-
 def verificar_entregas(df):
+
     # Considerar sem entrega quando a data estiver ausente (NaN) ou contiver apenas espaços.
     sem_entrega = (
         df["data_entrega"].isna() |
@@ -103,3 +99,22 @@ def verificar_entregas(df):
                 ["pedido_id", "status_pedido", "data_entrega"]
             ].head(3)
         )
+
+
+def converter_data(valor):
+    # Se a data estiver vazia, retornamos None.
+    if pd.isna(valor) or str(valor).strip() == "":
+        return None
+
+    try:
+        # Converter texto para datetime no formato esperado.
+        data = datetime.strptime(
+            str(valor).strip(),
+            "%Y-%m-%d %H:%M:%S"
+        )
+
+        return data
+
+    except ValueError:
+        # Se a data for inválida, o programa continua.
+        return None
