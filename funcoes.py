@@ -100,7 +100,6 @@ def verificar_entregas(df):
             ].head(3)
         )
 
-
 def converter_data(valor):
     # Se a data estiver vazia, retornamos None.
     if pd.isna(valor) or str(valor).strip() == "":
@@ -118,3 +117,40 @@ def converter_data(valor):
     except ValueError:
         # Se a data for inválida, o programa continua.
         return None
+
+def contar_por_canal(df):
+    canais_validos = ["Mercado", "Loja física", "Web"]
+
+    reconhecidos = df["canal_venda"].isin(canais_validos)
+
+    contagem = (
+        df.loc[reconhecidos]
+        .groupby("canal_venda")
+        .size()
+        .sort_values(ascending=False)
+    )
+
+    excluidos = (~reconhecidos).sum()
+
+    print("\n--- Pedidos por canal ---")
+    print(contagem.to_string())
+    print("Registros excluídos:", excluidos)
+
+    return contagem
+
+def contar_por_periodo(df):
+    validos = ~df["data_invalida"]
+
+    periodo = df.loc[validos, "data_convertida"].apply(
+        lambda data: data.strftime("%Y-%m")
+    )
+
+    contagem = periodo.value_counts().sort_index()
+
+    excluidos = (~validos).sum()
+
+    print("\n--- Pedidos por ano-mês ---")
+    print(contagem.to_string())
+    print("Registros excluídos:", excluidos)
+
+    return contagem

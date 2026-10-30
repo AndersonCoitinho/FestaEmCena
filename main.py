@@ -7,7 +7,9 @@ from funcoes import (
     validar_quantidade,
     validar_preco,
     verificar_entregas,
-    converter_data
+    converter_data,
+    contar_por_canal,
+    contar_por_periodo
 )
 
 
@@ -69,6 +71,16 @@ def main():
     print("Quantidades inválidas:", quantidade_invalida.sum())
     print("Preços inválidos:", preco_invalido.sum())
     print("Pedidos afetados:", pedidos_afetados)
+    total_cancelados = (
+        df["status_pedido"]
+        .astype("string")
+        .str.strip()
+        .str.lower()
+        .eq("cancelado")
+        .sum()
+    )
+
+    print("Total de cancelados:", total_cancelados)
 
     print("\n--- Verificação das entregas ---")
     verificar_entregas(df)
@@ -123,6 +135,39 @@ def main():
         "hora",
         "data_brasileira"
     ]].head())
+
+    pedidos_canal = contar_por_canal(df)
+    pedidos_periodo = contar_por_periodo(df)
+
+    
+    # Descoberta por canal.
+    canal_maior = pedidos_canal.idxmax()
+    total_canal_maior = pedidos_canal.max()
+    percentual = total_canal_maior / pedidos_canal.sum() * 100
+
+    print("\n--- Descoberta por canal ---")
+    print(
+        f"O canal {canal_maior} possui {total_canal_maior} "
+        f"pedidos ({percentual:.1f}% dos pedidos com canal reconhecido)."
+    )
+    print("Interpretação: é o canal com mais pedidos registrados.")
+    print("Limitação: inclui cancelados e devolvidos, não mede receita.")
+
+    # Descoberta por período.
+    periodo_maior = pedidos_periodo.idxmax()
+    total_periodo_maior = pedidos_periodo.max()
+
+    print("\n--- Descoberta por período ---")
+    print(
+        f"O período {periodo_maior} apresentou "
+        f"{total_periodo_maior} pedidos registrados."
+    )
+    print("Interpretação: foi o período com maior volume na base.")
+    print(
+        "Limitação: foram excluídas datas inválidas, "
+        "e os pedidos incluem todos os status."
+    )
+
 
 
 
